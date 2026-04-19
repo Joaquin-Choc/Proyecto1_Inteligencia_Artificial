@@ -5,53 +5,35 @@ from evaluacion import generar_k_folds, calcular_metricas
 
 def main():
     print("=== Sistema de Clasificación Naïve Bayes ===")
-    print("1. Cargando dataset...")
+    print("1. Cargando dataset de Bitext...")
     
-    # 1. Cargar del dataset
-    ruta_dataset = 'data/ticket_dataset.csv'
+    # 1. Ruta al nuevo dataset
+    ruta_dataset = 'data/bitext_dataset.csv'
     try:
         df = pd.read_csv(ruta_dataset)
     except FileNotFoundError:
         print(f"Error: No se encontró el dataset en {ruta_dataset}. Verifica la ruta.")
         return
 
-    # 2. Definir las columnas de texto y etiqueta
-    columna_texto = 'Ticket Description' 
-    columna_etiqueta = 'Ticket Type'
+    # 2. Definir las columnas exactas del nuevo CSV
+    columna_texto = 'instruction' 
+    columna_etiqueta = 'category'
 
-    # Eliminamos filas que no tengan texto o categoría
+    # Eliminamos filas nulas por si acaso
     df = df.dropna(subset=[columna_texto, columna_etiqueta])
 
-    # Mapeo de las clases en inglés del dataset
-    mapeo_categorias = {
-        'Technical issue': 'Soporte Técnico',
-        'Billing inquiry': 'Facturación',
-        'Product inquiry': 'Consulta General',
-        'Refund request': 'Queja',
-        'Cancellation request': 'Cancelación'
-    }
+    print("2. Preprocesando textos (esto tomará un momento por el tamaño del dataset)...")
     
-    # Mapeo a la columna de etiquetas
-    df[columna_etiqueta] = df[columna_etiqueta].map(mapeo_categorias)
+    # Aplicamos la limpieza, eliminación de placeholders, tokenización y stemming
+    df['Tokens'] = df[columna_texto].apply(lambda x: preprocesar_ticket(str(x), idioma='english'))
     
-    # Eliminamos por si acaso alguna categoría no se mapeó y quedó nula
-    df = df.dropna(subset=[columna_etiqueta])
-
-    print("2. Preprocesando textos (esto puede tomar unos minutos)...")
-    
-    # Union del "Subject" con la "Description" para tener más palabras clave
-    df['Texto_Completo'] = df['Ticket Subject'] + " " + df['Ticket Description']
-    
-    # Limpiamos, tokenizamos y realizamos stemming
-    df['Tokens'] = df['Texto_Completo'].apply(lambda x: preprocesar_ticket(str(x), idioma='english'))
-    
-    # Extraer las listas para inyectarlas al modelo
+    # Extraemos las listas para inyectarlas al modelo
     X_completo = df['Tokens'].tolist()
     y_completo = df[columna_etiqueta].tolist()
     clases_unicas = list(set(y_completo))
 
     print(f"Total de tickets procesados: {len(X_completo)}")
-    print(f"Categorías detectadas: {clases_unicas}")
+    print(f"Categorías detectadas ({len(clases_unicas)}): {clases_unicas}")
 
     # ==========================================
     # FASE DE EVALUACIÓN: K-Folds (K=5)
@@ -98,6 +80,7 @@ def main():
     ruta_modelo = 'modelo_guardado/modelo_nb.pkl'
     modelo_final.guardar_modelo(ruta_modelo)
     print(f"Modelo guardado exitosamente en: {ruta_modelo}")
+    print("¡Backend completado! Listo para integrar con la interfaz web.")
 
 if __name__ == '__main__':
     main()

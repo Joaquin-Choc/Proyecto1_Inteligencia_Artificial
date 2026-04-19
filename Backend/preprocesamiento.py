@@ -18,6 +18,9 @@ def limpiar_texto(texto):
     if not isinstance(texto, str):
         return ""
     
+    #La expresión r'\{\{.*?\}\}' busca todo lo que esté entre dos llaves dobles y lo borra.
+    texto = re.sub(r'\{\{.*?\}\}', ' ', texto)
+
     #Convertir a minúsculas
     texto = texto.lower()
 
