@@ -1,0 +1,27 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local/temporary files
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# Generated application artifacts
+Database/feedback.db
+modelo_guardado/*.pkl
+
+# Keep source datasets and app code tracked

@@ -1,0 +1,2 @@
+ticket_id,subject,description,true_category
+TKT-2026-673607,Tracking number is not updating,The shipment appears stuck in transit and the tracking page has not changed for four days.,ACCOUNT

@@ -50,26 +50,49 @@ class NaiveBayesMesaAyuda:
         """
         Predice la clase para un solo ticket ya procesado
         """
-        scores_clases = {}
-
-        for clase in self.clases:
-            #Inicializacion del scrore con el algoritmo de probabilidad
-            score = self.log_prior[clase]
-
-            for palabra in documento_tokenizado:
-                #Aplicar Laplace smoothing
-                frecuencia = self.frecuencia_palabras[clase].get(palabra, 0)
-                numerador = frecuencia + 1
-                denominador = self.total_palabras_clase[clase] + self.tamano_vocabulario
-                probabilidad_palabra = numerador / denominador
-            
-                score += math.log(probabilidad_palabra)
-        
-            scores_clases[clase] = score
+        scores_clases = self.calcular_scores(documento_tokenizado)
         
         #Retornar la clase con mayor score
         clase_ganadora = max(scores_clases, key=scores_clases.get)
         return clase_ganadora
+
+    def calcular_scores(self, documento_tokenizado):
+        """
+        Calcula el puntaje logarítmico para cada clase.
+        """
+        scores_clases = {}
+
+        for clase in self.clases:
+            score = self.log_prior[clase]
+
+            for palabra in documento_tokenizado:
+                frecuencia = self.frecuencia_palabras[clase].get(palabra, 0)
+                numerador = frecuencia + 1
+                denominador = self.total_palabras_clase[clase] + self.tamano_vocabulario
+                probabilidad_palabra = numerador / denominador
+
+                score += math.log(probabilidad_palabra)
+
+            scores_clases[clase] = score
+
+        return scores_clases
+
+    def predecir_proba(self, documento_tokenizado):
+        """
+        Devuelve probabilidades normalizadas por clase para una instancia.
+        """
+        scores = self.calcular_scores(documento_tokenizado)
+        if not scores:
+            return {}
+
+        max_score = max(scores.values())
+        exp_scores = {clase: math.exp(score - max_score) for clase, score in scores.items()}
+        suma_scores = sum(exp_scores.values())
+
+        if suma_scores == 0:
+            return {clase: 0.0 for clase in scores}
+
+        return {clase: valor / suma_scores for clase, valor in exp_scores.items()}
     
     def predecir(self, X_test):
         """
