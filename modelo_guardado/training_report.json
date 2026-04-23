@@ -1,0 +1,222 @@
+{
+  "total_instances": 53751,
+  "classes": [
+    "ACCOUNT",
+    "CANCEL",
+    "CONTACT",
+    "DELIVERY",
+    "FEEDBACK",
+    "INVOICE",
+    "ORDER",
+    "PAYMENT",
+    "REFUND",
+    "SHIPPING",
+    "SUBSCRIPTION"
+  ],
+  "k_folds": 5,
+  "accuracy": 0.9932652391448713,
+  "macro_f1": 0.992907318704827,
+  "metrics_by_class": {
+    "ACCOUNT": {
+      "Precision": 0.9991757089455275,
+      "Recall": 0.9984932342198063,
+      "F1-Score": 0.9988341719683904
+    },
+    "CANCEL": {
+      "Precision": 1.0,
+      "Recall": 0.9984481621556144,
+      "F1-Score": 0.9992224128845713
+    },
+    "CONTACT": {
+      "Precision": 1.0,
+      "Recall": 0.9975319663371243,
+      "F1-Score": 0.9987636066016883
+    },
+    "DELIVERY": {
+      "Precision": 0.9854166749471623,
+      "Recall": 0.9381428934031183,
+      "F1-Score": 0.9611955968726782
+    },
+    "FEEDBACK": {
+      "Precision": 0.9962654176523051,
+      "Recall": 0.999501246107372,
+      "F1-Score": 0.9978801686914862
+    },
+    "INVOICE": {
+      "Precision": 0.9995018679950187,
+      "Recall": 0.996206189211317,
+      "F1-Score": 0.9978485140721597
+    },
+    "ORDER": {
+      "Precision": 0.9816933219546208,
+      "Recall": 0.9958520799713171,
+      "F1-Score": 0.9887207975399657
+    },
+    "PAYMENT": {
+      "Precision": 0.996533262380462,
+      "Recall": 0.9979947494205371,
+      "F1-Score": 0.9972626688644285
+    },
+    "REFUND": {
+      "Precision": 1.0,
+      "Recall": 0.9966492235892968,
+      "F1-Score": 0.998321293205618
+    },
+    "SHIPPING": {
+      "Precision": 0.97145808249438,
+      "Recall": 0.9987482439316542,
+      "F1-Score": 0.9849109748083776
+    },
+    "SUBSCRIPTION": {
+      "Precision": 0.9990271867612293,
+      "Recall": 0.999014563106796,
+      "F1-Score": 0.9990203002437322
+    }
+  },
+  "confusion_matrix": {
+    "ACCOUNT": {
+      "ACCOUNT": 11957,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 0,
+      "FEEDBACK": 0,
+      "INVOICE": 0,
+      "ORDER": 4,
+      "PAYMENT": 14,
+      "REFUND": 0,
+      "SHIPPING": 0,
+      "SUBSCRIPTION": 0
+    },
+    "CANCEL": {
+      "ACCOUNT": 0,
+      "CANCEL": 1898,
+      "CONTACT": 0,
+      "DELIVERY": 2,
+      "FEEDBACK": 0,
+      "INVOICE": 0,
+      "ORDER": 0,
+      "PAYMENT": 0,
+      "REFUND": 0,
+      "SHIPPING": 0,
+      "SUBSCRIPTION": 1
+    },
+    "CONTACT": {
+      "ACCOUNT": 0,
+      "CANCEL": 0,
+      "CONTACT": 3988,
+      "DELIVERY": 2,
+      "FEEDBACK": 8,
+      "INVOICE": 0,
+      "ORDER": 0,
+      "PAYMENT": 0,
+      "REFUND": 0,
+      "SHIPPING": 0,
+      "SUBSCRIPTION": 0
+    },
+    "DELIVERY": {
+      "ACCOUNT": 0,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 3742,
+      "FEEDBACK": 0,
+      "INVOICE": 0,
+      "ORDER": 140,
+      "PAYMENT": 0,
+      "REFUND": 0,
+      "SHIPPING": 106,
+      "SUBSCRIPTION": 0
+    },
+    "FEEDBACK": {
+      "ACCOUNT": 0,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 0,
+      "FEEDBACK": 3992,
+      "INVOICE": 0,
+      "ORDER": 0,
+      "PAYMENT": 0,
+      "REFUND": 0,
+      "SHIPPING": 2,
+      "SUBSCRIPTION": 0
+    },
+    "INVOICE": {
+      "ACCOUNT": 0,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 8,
+      "FEEDBACK": 5,
+      "INVOICE": 3983,
+      "ORDER": 0,
+      "PAYMENT": 0,
+      "REFUND": 0,
+      "SHIPPING": 2,
+      "SUBSCRIPTION": 0
+    },
+    "ORDER": {
+      "ACCOUNT": 0,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 23,
+      "FEEDBACK": 2,
+      "INVOICE": 2,
+      "ORDER": 7943,
+      "PAYMENT": 0,
+      "REFUND": 0,
+      "SHIPPING": 6,
+      "SUBSCRIPTION": 0
+    },
+    "PAYMENT": {
+      "ACCOUNT": 6,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 2,
+      "FEEDBACK": 0,
+      "INVOICE": 0,
+      "ORDER": 0,
+      "PAYMENT": 3988,
+      "REFUND": 0,
+      "SHIPPING": 0,
+      "SUBSCRIPTION": 0
+    },
+    "REFUND": {
+      "ACCOUNT": 2,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 18,
+      "FEEDBACK": 0,
+      "INVOICE": 0,
+      "ORDER": 0,
+      "PAYMENT": 0,
+      "REFUND": 5966,
+      "SHIPPING": 0,
+      "SUBSCRIPTION": 0
+    },
+    "SHIPPING": {
+      "ACCOUNT": 2,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 0,
+      "FEEDBACK": 0,
+      "INVOICE": 0,
+      "ORDER": 2,
+      "PAYMENT": 0,
+      "REFUND": 0,
+      "SHIPPING": 3936,
+      "SUBSCRIPTION": 1
+    },
+    "SUBSCRIPTION": {
+      "ACCOUNT": 0,
+      "CANCEL": 0,
+      "CONTACT": 0,
+      "DELIVERY": 0,
+      "FEEDBACK": 0,
+      "INVOICE": 0,
+      "ORDER": 2,
+      "PAYMENT": 0,
+      "REFUND": 0,
+      "SHIPPING": 0,
+      "SUBSCRIPTION": 1996
+    }
+  },
+  "model_path": "D:\\Uni\\7mo semestre\\Inteligencia Artificial\\Proyecto1_Inteligencia_Artificial\\modelo_guardado\\modelo_nb.pkl"
+}

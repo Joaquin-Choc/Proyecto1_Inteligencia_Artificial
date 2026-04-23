@@ -317,9 +317,13 @@ async function getTrainingStatus() {
   return response.json();
 }
 
-async function waitForTrainingCompletion() {
+async function waitForTrainingCompletion(onStatusUpdate) {
   for (;;) {
     const status = await getTrainingStatus();
+
+    if (typeof onStatusUpdate === 'function') {
+      onStatusUpdate(status);
+    }
 
     if (status.status === 'completed') {
       return status;
@@ -351,7 +355,11 @@ async function retrainModel() {
     }
 
     setTrainNotice('Reentrenamiento iniciado. Espera a que termine...', 'warning');
-    const finalStatus = await waitForTrainingCompletion();
+    const finalStatus = await waitForTrainingCompletion((status) => {
+      const progress = Number.isFinite(status?.progress) ? status.progress : 1;
+      setTrainProgress(progress, status?.message || 'Entrenando...');
+      renderTrainingMetrics(status);
+    });
     setTrainProgress(finalStatus.progress ?? 100, finalStatus.message || 'Entrenamiento finalizado.');
     renderTrainingMetrics(finalStatus);
 

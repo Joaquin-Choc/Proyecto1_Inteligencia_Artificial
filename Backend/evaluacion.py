@@ -1,24 +1,32 @@
 import random
 
-def generar_k_folds(X, y, k=5):
+def generar_k_folds(X, y, k=5, seed=42):
     """
     Divide los datos en k pliegues aleatorios para validación cruzada.
     Retorna una listas de pliegues, donde cada pliegue es una tupla (X_train, y_train, X_test, y_test).
     """
 
+    if k <= 1:
+        raise ValueError("k debe ser mayor que 1 para validacion cruzada")
+
     #Emparejar los textos con sus etiquetas y barajarlos
     datos_combinados = list(zip(X, y))
-    random.shuffle(datos_combinados)
+    random.Random(seed).shuffle(datos_combinados)
 
-    tamaño_pliegue = len(datos_combinados) // k
     pliegues = []
+    total_datos = len(datos_combinados)
+    tamano_base = total_datos // k
+    residuo = total_datos % k
+    inicio = 0
 
     for i in range(k):
-        inicio = i * tamaño_pliegue
-        #Si es el último pliegue, tomando en cuenta el resto para no perder datos
-        fin = (i + 1) * tamaño_pliegue if i != k - 1 else len(datos_combinados)
+        # Reparte el residuo entre los primeros pliegues para no perder instancias.
+        tamano_actual = tamano_base + (1 if i < residuo else 0)
+        fin = inicio + tamano_actual
         pliegues_actual = datos_combinados[inicio:fin]
         pliegues.append(pliegues_actual)
+        inicio = fin
+
     return pliegues
 
 def crear_matriz_confusion(y_reales, y_predichas, clases):
@@ -80,3 +88,38 @@ def calcular_metricas(y_reales, y_predichas, clases):
         'Accuracy': accuracy_global,
         'Macro F1': macro_f1
     }
+
+
+def inicializar_matriz_confusion(clases):
+    return {clase_real: {clase_pred: 0 for clase_pred in clases} for clase_real in clases}
+
+
+def acumular_matriz_confusion(matriz_acumulada, matriz_nueva, clases):
+    for clase_real in clases:
+        for clase_pred in clases:
+            matriz_acumulada[clase_real][clase_pred] += matriz_nueva[clase_real][clase_pred]
+
+
+def promedio_metricas_por_clase(metricas_por_fold, clases):
+    acumulado = {
+        clase: {'Precision': 0.0, 'Recall': 0.0, 'F1-Score': 0.0}
+        for clase in clases
+    }
+
+    cantidad_folds = len(metricas_por_fold)
+    if cantidad_folds == 0:
+        return acumulado
+
+    for metricas_fold in metricas_por_fold:
+        for clase in clases:
+            valores = metricas_fold.get(clase, {})
+            acumulado[clase]['Precision'] += valores.get('Precision', 0.0)
+            acumulado[clase]['Recall'] += valores.get('Recall', 0.0)
+            acumulado[clase]['F1-Score'] += valores.get('F1-Score', 0.0)
+
+    for clase in clases:
+        acumulado[clase]['Precision'] /= cantidad_folds
+        acumulado[clase]['Recall'] /= cantidad_folds
+        acumulado[clase]['F1-Score'] /= cantidad_folds
+
+    return acumulado

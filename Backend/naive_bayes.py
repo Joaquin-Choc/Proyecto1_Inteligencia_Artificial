@@ -124,7 +124,14 @@ class NaiveBayesMesaAyuda:
         with open(ruta_archivo, 'rb') as archivo:
             datos = pickle.load(archivo)
             self.log_prior = datos['log_prior']
-            self.frecuencia_palabras = datos['frecuencia_palabras']
-            self.total_palabras_clase = datos['total_palabras_clase']
+            self.frecuencia_palabras = defaultdict(
+                lambda: defaultdict(int),
+                {
+                    clase: defaultdict(int, frecuencias)
+                    for clase, frecuencias in datos['frecuencia_palabras'].items()
+                },
+            )
+            self.total_palabras_clase = defaultdict(int, datos['total_palabras_clase'])
+            self.vocabulario = set(datos.get('vocabulario', set()))
             self.tamano_vocabulario = datos['tamano_vocabulario']
-            self.clases = datos['clases']
+            self.clases = set(datos['clases'])

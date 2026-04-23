@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 import csv
+import json
 import sqlite3
 from pathlib import Path
 
 from naive_bayes import NaiveBayesMesaAyuda
 from preprocesamiento import preprocesar_ticket
-from evaluacion import generar_k_folds, calcular_metricas
+from evaluacion import (
+    generar_k_folds,
+    calcular_metricas,
+    inicializar_matriz_confusion,
+    acumular_matriz_confusion,
+    promedio_metricas_por_clase,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -15,6 +22,7 @@ BITEXT_DATASET_PATH = DATABASE_DIR / "bitext_dataset.csv"
 FEEDBACK_DB_PATH = DATABASE_DIR / "feedback.db"
 LEGACY_FEEDBACK_CSV_PATH = DATABASE_DIR / "training_examples.csv"
 MODEL_PATH = PROJECT_ROOT / "modelo_guardado" / "modelo_nb.pkl"
+REPORT_PATH = PROJECT_ROOT / "modelo_guardado" / "training_report.json"
 
 
 def read_csv_rows(csv_path: Path) -> list[dict[str, str]]:
@@ -136,10 +144,12 @@ def train_model(progress_callback=None):
     print("\n3. Iniciando K-Folds Cross Validation (K=5)...")
     if progress_callback:
         progress_callback(25, "Iniciando validación cruzada...")
-    pliegues = generar_k_folds(X_completo, y_completo, k=5)
+    pliegues = generar_k_folds(X_completo, y_completo, k=5, seed=42)
 
     lista_accuracy = []
     lista_macro_f1 = []
+    metricas_por_clase_folds = []
+    matriz_confusion_acumulada = inicializar_matriz_confusion(clases_unicas)
 
     for i in range(5):
         print(f"   -> Evaluando Fold {i+1}/5...")
@@ -151,6 +161,9 @@ def train_model(progress_callback=None):
             if i != j:
                 train_data.extend(pliegues[j])
 
+        if not train_data or not test_data:
+            continue
+
         X_train, y_train = zip(*train_data)
         X_test, y_test = zip(*test_data)
 
@@ -161,13 +174,39 @@ def train_model(progress_callback=None):
         metricas = calcular_metricas(y_test, y_pred, clases_unicas)
         lista_accuracy.append(metricas["Accuracy"])
         lista_macro_f1.append(metricas["Macro F1"])
+        metricas_por_clase_folds.append(metricas["Métricas por Clase"])
+        acumular_matriz_confusion(
+            matriz_confusion_acumulada,
+            metricas["Matriz de Confusión"],
+            clases_unicas,
+        )
+
+    if not lista_accuracy or not lista_macro_f1:
+        raise RuntimeError("No fue posible evaluar los folds. Revisa el dataset y el valor de k.")
 
     accuracy_promedio = sum(lista_accuracy) / len(lista_accuracy)
     macro_f1_promedio = sum(lista_macro_f1) / len(lista_macro_f1)
+    metricas_por_clase_promedio = promedio_metricas_por_clase(metricas_por_clase_folds, clases_unicas)
 
     print("\n=== Resultados de Evaluación (Promedio 5 Folds) ===")
     print(f"Accuracy Global: {accuracy_promedio:.4f}")
     print(f"Macro F1-Score:  {macro_f1_promedio:.4f}")
+    print("\nMétricas promedio por clase:")
+    for clase in clases_unicas:
+        metricas_clase = metricas_por_clase_promedio[clase]
+        print(
+            f"- {clase}: "
+            f"Precision={metricas_clase['Precision']:.4f}, "
+            f"Recall={metricas_clase['Recall']:.4f}, "
+            f"F1={metricas_clase['F1-Score']:.4f}"
+        )
+
+    print("\nMatriz de confusion acumulada (sumada entre folds):")
+    encabezado = "real\\pred" + "\t" + "\t".join(clases_unicas)
+    print(encabezado)
+    for clase_real in clases_unicas:
+        fila = [str(matriz_confusion_acumulada[clase_real][clase_pred]) for clase_pred in clases_unicas]
+        print(f"{clase_real}\t" + "\t".join(fila))
     if progress_callback:
         progress_callback(85, "Calculando métricas finales...")
 
@@ -176,19 +215,29 @@ def train_model(progress_callback=None):
         progress_callback(92, "Entrenando modelo final...")
     modelo_final = NaiveBayesMesaAyuda()
     modelo_final.entrenar(X_completo, y_completo)
+    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     modelo_final.guardar_modelo(MODEL_PATH)
+
+    report_data = {
+        "total_instances": len(X_completo),
+        "classes": clases_unicas,
+        "k_folds": 5,
+        "accuracy": accuracy_promedio,
+        "macro_f1": macro_f1_promedio,
+        "metrics_by_class": metricas_por_clase_promedio,
+        "confusion_matrix": matriz_confusion_acumulada,
+        "model_path": str(MODEL_PATH),
+    }
+    with REPORT_PATH.open("w", encoding="utf-8") as report_file:
+        json.dump(report_data, report_file, ensure_ascii=False, indent=2)
+
     print(f"Modelo guardado exitosamente en: {MODEL_PATH}")
+    print(f"Reporte de entrenamiento guardado en: {REPORT_PATH}")
     print("¡Backend completado! Listo para integrar con la interfaz web.")
     if progress_callback:
         progress_callback(100, "Entrenamiento finalizado.")
 
-    return {
-        "total_instances": len(X_completo),
-        "classes": clases_unicas,
-        "accuracy": accuracy_promedio,
-        "macro_f1": macro_f1_promedio,
-        "model_path": str(MODEL_PATH),
-    }
+    return report_data
 
 
 def main():

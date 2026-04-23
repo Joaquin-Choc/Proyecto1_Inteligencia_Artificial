@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 import os
 import random
 import sqlite3
@@ -19,6 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
 FRONTEND_DIR = PROJECT_ROOT / "Frontend"
 MODEL_PATH = PROJECT_ROOT / "modelo_guardado" / "modelo_nb.pkl"
+REPORT_PATH = PROJECT_ROOT / "modelo_guardado" / "training_report.json"
 FEEDBACK_DB_PATH = PROJECT_ROOT / "Database" / "feedback.db"
 
 app = Flask(
@@ -150,6 +152,24 @@ def set_training_state(status: str, message: str = "", progress: int | None = No
 			training_state["progress"] = max(0, min(100, int(progress)))
 		training_state["result"] = result
 		training_state["error"] = error
+
+
+def load_training_state_from_report() -> None:
+	if not REPORT_PATH.exists():
+		return
+
+	try:
+		with REPORT_PATH.open("r", encoding="utf-8") as report_file:
+			report_data = json.load(report_file)
+		set_training_state(
+			"completed",
+			"Reporte de entrenamiento cargado.",
+			progress=100,
+			result=report_data,
+		)
+	except Exception:
+		# Si el reporte no puede leerse, mantenemos el estado por defecto sin bloquear la app.
+		return
 
 
 def run_training_job() -> None:
@@ -367,6 +387,7 @@ def upload_examples():
 
 init_feedback_db()
 load_model()
+load_training_state_from_report()
 
 
 if __name__ == "__main__":
